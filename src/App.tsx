@@ -1,26 +1,147 @@
-/* eslint-disable max-len */
 /* eslint-disable jsx-a11y/control-has-associated-label */
-import React from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { UserWarning } from './UserWarning';
+import { getTodos } from './api/todos';
+import { Todo } from './types/Todo';
+import { client } from './utils/fetchClient';
 
-const USER_ID = 0;
+import { Header } from './components/Header';
+import { TodoList } from './components/TodoList';
+import { Footer } from './components/Footer';
+import { ErrorMessage } from './types/common';
+
+const USER_ID = 1;
 
 export const App: React.FC = () => {
+  const [todos, setTodos] = useState<Todo[]>([]);
+  const [tempTodo, setTempTodo] = useState<Todo | null>(null);
+  const [processingIds, setProcessingIds] = useState<number[]>([]);
+  const [error, setError] = useState<ErrorMessage | null>(null);
+  const [newTitle, setNewTitle] = useState('');
+
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // LOAD TODOS
+  useEffect(() => {
+    getTodos()
+      .then(setTodos)
+      .catch(() => setError(ErrorMessage.LoadTodos));
+  }, []);
+
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
+
+  // ADD TODO
+  const handleAddTodo = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const title = newTitle.trim();
+
+    if (!title) {
+      setError(ErrorMessage.EmptyTitle);
+
+      return;
+    }
+
+    const newTodo = {
+      id: 0,
+      title,
+      completed: false,
+      userId: USER_ID,
+    };
+
+    setTempTodo(newTodo);
+
+    try {
+      const created = await client.post('/todos', newTodo);
+
+      setTodos(prev => [...prev, created]);
+      setNewTitle('');
+    } catch {
+      setError(ErrorMessage.AddTodo);
+    } finally {
+      setTempTodo(null);
+      inputRef.current?.focus();
+    }
+  };
+
+  // DELETE TODO
+  const handleDeleteTodo = async (id: number) => {
+    setProcessingIds(prev => [...prev, id]);
+    try {
+      await client.get(`/todos/${id}`);
+      setTodos(prev => prev.filter(todo => todo.id !== id));
+    } catch {
+      setError(ErrorMessage.DeleteTodo);
+    } finally {
+      setProcessingIds(prev => prev.filter(pid => pid !== id));
+    }
+  };
+
+  // CLEAR COMPLETED
+  const handleClearCompleted = () => {
+    todos
+      .filter(todo => todo.completed)
+      .forEach(todo => handleDeleteTodo(todo.id));
+  };
+
   if (!USER_ID) {
     return <UserWarning />;
   }
 
-  return (
-    <section className="section container">
-      <p className="title is-4">
-        Copy all you need from the prev task:
-        <br />
-        <a href="https://github.com/mate-academy/react_todo-app-loading-todos#react-todo-app-load-todos">
-          React Todo App - Load Todos
-        </a>
-      </p>
+  const completedCount = todos.filter(t => t.completed).length;
 
-      <p className="subtitle">Styles are already copied</p>
-    </section>
+  return (
+    <div className="todoapp">
+      <h1 className="todoapp__title">todos</h1>
+
+      <div className="todoapp__content">
+        {/* Header */}
+        <Header
+          todos={todos}
+          newTitle={newTitle}
+          setNewTitle={setNewTitle}
+          handleAddTodo={handleAddTodo}
+          inputRef={inputRef}
+        />
+
+        {/* TodoList */}
+        <TodoList
+          todos={todos}
+          onDelete={handleDeleteTodo}
+          processingIds={processingIds}
+        />
+
+        {/* Temporary todo (optimistic UI) */}
+        {tempTodo && (
+          <TodoList
+            todos={[tempTodo]}
+            onDelete={() => {}}
+            processingIds={[0]}
+          />
+        )}
+
+        {/* Footer */}
+        {todos.length > 0 && (
+          <Footer
+            completedCount={completedCount}
+            onClearCompleted={handleClearCompleted}
+          />
+        )}
+      </div>
+
+      {/* Error notification */}
+      {!!error && (
+        <div className="notification is-danger is-light">
+          <button
+            type="button"
+            className="delete"
+            onClick={() => setError(null)}
+          />
+          {error}
+        </div>
+      )}
+    </div>
   );
 };

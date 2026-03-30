@@ -7,11 +7,11 @@ type Props = {
   setNewTitle: (value: string) => void;
   handleAddTodo: (e: React.FormEvent) => void;
   inputRef: React.RefObject<HTMLInputElement>;
-  isLoading: boolean;
+  isLoading?: boolean;
+  handleToggleAll?: () => void;
 };
 
 export const Header: React.FC<Props> = ({
-  todos,
   newTitle,
   setNewTitle,
   handleAddTodo,
@@ -23,13 +23,10 @@ export const Header: React.FC<Props> = ({
       <form onSubmit={handleAddTodo}>
         <input
           ref={inputRef}
-          data-cy="NewTodoField"
-          type="text"
-          className="todoapp__new-todo"
-          placeholder="What needs to be done?"
           value={newTitle}
           onChange={e => setNewTitle(e.target.value)}
           disabled={isLoading}
+          data-cy="NewTodoField"
         />
       </form>
     </header>

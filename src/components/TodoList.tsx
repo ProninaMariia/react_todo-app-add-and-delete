@@ -17,7 +17,7 @@ export const TodoList: React.FC<Props> = ({
     <section className="todoapp__main">
       {todos.map(todo => (
         <TodoItem
-          key={todo.id}
+          key={todo.id === 0 ? 'temp' : todo.id} // 🔹 унікальний ключ для тимчасового todo
           todo={todo}
           onDelete={onDelete}
           isProcessing={processingIds.includes(todo.id)}

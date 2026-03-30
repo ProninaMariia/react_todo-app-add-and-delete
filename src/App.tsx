@@ -23,14 +23,26 @@ export const App: React.FC = () => {
 
   // LOAD TODOS
   useEffect(() => {
-    getTodos()
+    getTodos(USER_ID)
       .then(setTodos)
       .catch(() => setError(ErrorMessage.LoadTodos));
   }, []);
 
+  // Фокус на input при монтованні
   useEffect(() => {
     inputRef.current?.focus();
   }, []);
+
+  // Авто-ховання нотифікації через 3 сек
+  useEffect(() => {
+    if (!error) {
+      return;
+    }
+
+    const timer = setTimeout(() => setError(null), 3000);
+
+    return () => clearTimeout(timer);
+  }, [error]);
 
   // ADD TODO
   const handleAddTodo = async (e: React.FormEvent) => {
@@ -44,17 +56,12 @@ export const App: React.FC = () => {
       return;
     }
 
-    const newTodo = {
-      id: 0,
-      title,
-      completed: false,
-      userId: USER_ID,
-    };
+    const newTodo = { id: 0, title, completed: false, userId: USER_ID };
 
     setTempTodo(newTodo);
 
     try {
-      const created = await client.post('/todos', newTodo);
+      const created: Todo = await client.post('/todos', newTodo);
 
       setTodos(prev => [...prev, created]);
       setNewTitle('');
@@ -70,7 +77,7 @@ export const App: React.FC = () => {
   const handleDeleteTodo = async (id: number) => {
     setProcessingIds(prev => [...prev, id]);
     try {
-      await client.get(`/todos/${id}`);
+      await client.delete(`/todos/${id}`);
       setTodos(prev => prev.filter(todo => todo.id !== id));
     } catch {
       setError(ErrorMessage.DeleteTodo);
@@ -103,7 +110,9 @@ export const App: React.FC = () => {
           newTitle={newTitle}
           setNewTitle={setNewTitle}
           handleAddTodo={handleAddTodo}
+          handleToggleAll={() => {}}
           inputRef={inputRef}
+          isLoading={!!tempTodo}
         />
 
         {/* TodoList */}
@@ -129,19 +138,21 @@ export const App: React.FC = () => {
             onClearCompleted={handleClearCompleted}
           />
         )}
-      </div>
 
-      {/* Error notification */}
-      {!!error && (
-        <div className="notification is-danger is-light">
+        {/* Error notification (завжди в DOM для Cypress) */}
+        <div
+          data-cy="ErrorNotification"
+          className={`notification is-danger is-light ${error ? '' : 'hidden'}`}
+        >
           <button
             type="button"
             className="delete"
+            data-cy="HideErrorButton"
             onClick={() => setError(null)}
           />
-          {error}
+          {error || ''}
         </div>
-      )}
+      </div>
     </div>
   );
 };

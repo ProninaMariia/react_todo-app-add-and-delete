@@ -2,8 +2,14 @@
   "extends": "@mate-academy/students-ts-config",
   "include": ["src"],
   "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "jsx": "react-jsx",
     "sourceMap": false,
     "types": ["node", "cypress"],
-    "jsx": "react-jsx"
+    "baseUrl": "./src",
+    "paths": {
+      "*": ["*"]
+    },
   }
 }

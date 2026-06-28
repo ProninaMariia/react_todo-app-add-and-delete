@@ -26,7 +26,10 @@ export const Header: React.FC<Props> = ({
           value={newTitle}
           onChange={e => setNewTitle(e.target.value)}
           disabled={isLoading}
+          autoFocus
           data-cy="NewTodoField"
+          className="todoapp__new-todo"
+          placeholder="What needs to be done?"
         />
       </form>
     </header>

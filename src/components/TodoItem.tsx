@@ -1,27 +1,45 @@
 import React from 'react';
-import { Todo } from '../types/Todo';
 
-type Props = {
-  todo: Todo;
+interface Props {
+  todo: {
+    id: number;
+    title: string;
+    completed: boolean;
+  };
   onDelete: (id: number) => void;
   isProcessing: boolean;
-};
+}
 
 export const TodoItem: React.FC<Props> = ({ todo, onDelete, isProcessing }) => {
   return (
-    <div className={`todo ${todo.completed ? 'completed' : ''}`}>
-      <span className="todo__title">{todo.title}</span>
+    <div data-cy="Todo" className={`todo ${todo.completed ? 'completed' : ''}`}>
+      <input
+        data-cy="TodoStatus"
+        type="checkbox"
+        className="todo__status"
+        checked={todo.completed}
+        readOnly
+      />
+
+      <span className="todo__title" data-cy="TodoTitle">
+        {todo.title}
+      </span>
 
       <button
         type="button"
         className="todo__remove"
+        data-cy="TodoDelete"
         onClick={() => onDelete(todo.id)}
       >
         ×
       </button>
 
-      <div className={`modal overlay ${isProcessing ? 'is-active' : ''}`}>
+      <div
+        data-cy="TodoLoader"
+        className={`modal overlay ${isProcessing ? 'is-active' : ''}`}
+      >
         <div className="modal-background has-background-white-ter" />
+
         <div className="loader" />
       </div>
     </div>

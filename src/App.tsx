@@ -79,10 +79,8 @@ export const App: React.FC = () => {
   };
 
   const handleDeleteTodo = (id: number) => {
-    // Спочатку миттєво ставимо лоадер
     setProcessingIds(prev => [...prev, id]);
 
-    // Відкладаємо запит на видалення
     setTimeout(async () => {
       try {
         await client.delete(`/todos/${id}`);
@@ -91,7 +89,6 @@ export const App: React.FC = () => {
         setError(ErrorMessage.DeleteTodo);
       } finally {
         setProcessingIds(prev => prev.filter(pid => pid !== id));
-        // Повертаємо фокус в інпут після завершення видалення
         inputRef.current?.focus();
       }
     }, 0);
@@ -152,11 +149,11 @@ export const App: React.FC = () => {
               {activeTodosCount} items left
             </span>
 
-            <nav data-cy="Filter" className="filters">
+            <nav data-cy="Filter" className="filter">
               <a
                 href="#/"
                 data-cy="FilterLinkAll"
-                className={filter === 'all' ? 'selected' : ''}
+                className={`filter__link ${filter === 'all' ? 'selected' : ''}`}
                 onClick={() => setFilter('all')}
               >
                 All
@@ -165,7 +162,7 @@ export const App: React.FC = () => {
               <a
                 href="#/active"
                 data-cy="FilterLinkActive"
-                className={filter === 'active' ? 'selected' : ''}
+                className={`filter__link ${filter === 'active' ? 'selected' : ''}`}
                 onClick={() => setFilter('active')}
               >
                 Active
@@ -174,13 +171,12 @@ export const App: React.FC = () => {
               <a
                 href="#/completed"
                 data-cy="FilterLinkCompleted"
-                className={filter === 'completed' ? 'selected' : ''}
+                className={`filter__link ${filter === 'completed' ? 'selected' : ''}`}
                 onClick={() => setFilter('completed')}
               >
                 Completed
               </a>
             </nav>
-
             <button
               type="button"
               data-cy="ClearCompletedButton"

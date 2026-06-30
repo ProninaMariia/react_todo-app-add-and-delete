@@ -13,13 +13,16 @@ interface Props {
 export const TodoItem: React.FC<Props> = ({ todo, onDelete, isProcessing }) => {
   return (
     <div data-cy="Todo" className={`todo ${todo.completed ? 'completed' : ''}`}>
-      <input
-        data-cy="TodoStatus"
-        type="checkbox"
-        className="todo__status"
-        checked={todo.completed}
-        readOnly
-      />
+      <label className="todo__status-label">
+        <input
+          data-cy="TodoStatus"
+          type="checkbox"
+          className="todo__status"
+          checked={todo.completed}
+          onChange={() => {}}
+          aria-label="Toggle todo status"
+        />
+      </label>
 
       <span className="todo__title" data-cy="TodoTitle">
         {todo.title}

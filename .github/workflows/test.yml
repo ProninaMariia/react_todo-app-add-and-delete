@@ -24,9 +24,12 @@ jobs:
         run: npm ci
 
       - name: Start app
-        run: npm run dev &
+        run: npm run start &
         env:
           TERM: xterm
+
+      - name: Wait for server
+        run: npx wait-on http://localhost:3001 --timeout 60000
 
       - name: Run Cypress tests
         run: npm run test:e2e

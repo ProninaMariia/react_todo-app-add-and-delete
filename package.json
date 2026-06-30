@@ -46,7 +46,7 @@
     "wait-on": "^9.0.10"
   },
   "scripts": {
-    "start": "mate-scripts start -l",
+    "start": "mate-scripts start -l --port 3001",
     "build": "mate-scripts build",
     "test": "mate-scripts test -l",
     "style-format": "npx stylelint 'src/**/*.scss' --fix --allow-empty-input",
